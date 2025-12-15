@@ -55,8 +55,8 @@ class CropCalculator:
 
             if left_eye and right_eye:
                 eye_center = (
-                    (left_eye[0] + right_eye[0]) // 2,
-                    (left_eye[1] + right_eye[1]) // 2
+                    (left_eye[0] + right_eye[0]) / 2.0,
+                    (left_eye[1] + right_eye[1]) / 2.0
                 )
                 eye_centers.append(eye_center)
 
@@ -74,9 +74,13 @@ class CropCalculator:
         min_x, max_x = min(all_x), max(all_x)
         min_y, max_y = min(all_y), max(all_y)
 
-        # Calculate center point
-        center_x = (min_x + max_x) // 2
-        center_y = (min_y + max_y) // 2
+        # Calculate center point (use float for precision)
+        center_x = (min_x + max_x) / 2.0
+        center_y = (min_y + max_y) / 2.0
+
+        logger.info(f"Reference points: {len(reference_points)} points")
+        logger.info(f"X range: {min_x} to {max_x}, Y range: {min_y} to {max_y}")
+        logger.info(f"Center point: ({center_x:.1f}, {center_y:.1f})")
 
         # Calculate crop dimensions based on 9:16 aspect ratio
         crop_height = video_height
@@ -87,10 +91,15 @@ class CropCalculator:
             crop_width = video_width
             crop_height = int(crop_width / self.aspect_ratio)
 
+        logger.info(f"Video dimensions: {video_width}x{video_height}")
+        logger.info(f"Crop dimensions: {crop_width}x{crop_height}")
+
         # Position crop to keep eyes in upper portion of frame
-        # Eyes should be at about 30% from top
+        # Eyes should be at about 30% from top of the crop
+        # So: crop_y + (crop_height * 0.3) = center_y
+        # Therefore: crop_y = center_y - (crop_height * 0.3)
         crop_y = int(center_y - crop_height * Config.CROP_PADDING_TOP)
-        crop_x = center_x - crop_width // 2
+        crop_x = int(center_x - crop_width / 2.0)
 
         # Ensure crop stays within video bounds
         crop_x = max(0, min(crop_x, video_width - crop_width))
@@ -138,8 +147,8 @@ class CropCalculator:
             crop_height = int(crop_width / self.aspect_ratio)
 
         # Center the crop
-        crop_x = (video_width - crop_width) // 2
-        crop_y = (video_height - crop_height) // 2
+        crop_x = int((video_width - crop_width) / 2.0)
+        crop_y = int((video_height - crop_height) / 2.0)
 
         logger.info(f"Calculated center crop: x={crop_x}, y={crop_y}, w={crop_width}, h={crop_height}")
 
@@ -173,8 +182,8 @@ class CropCalculator:
         min_y = max(0, min_y - padding_y)
         max_y = min(video_height, max_y + padding_y)
 
-        center_x = (min_x + max_x) // 2
-        center_y = (min_y + max_y) // 2
+        center_x = (min_x + max_x) / 2.0
+        center_y = (min_y + max_y) / 2.0
 
         # Calculate dimensions
         crop_height = video_height
@@ -185,8 +194,8 @@ class CropCalculator:
             crop_height = int(crop_width / self.aspect_ratio)
 
         # Center on reference points
-        crop_x = center_x - crop_width // 2
-        crop_y = center_y - crop_height // 2
+        crop_x = int(center_x - crop_width / 2.0)
+        crop_y = int(center_y - crop_height / 2.0)
 
         # Clamp to bounds
         crop_x = max(0, min(crop_x, video_width - crop_width))
