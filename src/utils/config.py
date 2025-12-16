@@ -15,8 +15,8 @@ class Config:
     FACE_THRESHOLD = 0.95
 
     # Scene detection
-    SCENE_THRESHOLD = 27.0  # Sensitivity for scene detection
-    MIN_SCENE_LENGTH = 15  # Minimum frames per scene
+    SCENE_THRESHOLD = 20.0  # Sensitivity for scene detection
+    MIN_SCENE_LENGTH = 5  # Minimum frames per scene
 
     # Lip movement detection
     LIP_MOVEMENT_THRESHOLD = 0.02  # Threshold for lip movement variance

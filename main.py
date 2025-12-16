@@ -53,7 +53,7 @@ def main():
     parser.add_argument(
         "--scene-threshold",
         type=float,
-        default=27.0,
+        default=20.0,
         help="Scene detection sensitivity (default: 27.0)"
     )
 

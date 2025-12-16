@@ -166,24 +166,20 @@ class CropCalculator:
         Returns:
             (x, y, width, height) crop region
         """
-        # Find bounding box with padding
+        logger.info("Using expanded crop calculation (person moves more than crop width)")
+
+        # Find bounding box
         all_x = [pt[0] for pt in reference_points]
         all_y = [pt[1] for pt in reference_points]
 
         min_x, max_x = min(all_x), max(all_x)
         min_y, max_y = min(all_y), max(all_y)
 
-        # Add padding
-        padding_x = int((max_x - min_x) * 0.5)
-        padding_y = int((max_y - min_y) * 0.5)
+        point_span_x = max_x - min_x
+        point_span_y = max_y - min_y
 
-        min_x = max(0, min_x - padding_x)
-        max_x = min(video_width, max_x + padding_x)
-        min_y = max(0, min_y - padding_y)
-        max_y = min(video_height, max_y + padding_y)
-
-        center_x = (min_x + max_x) / 2.0
-        center_y = (min_y + max_y) / 2.0
+        logger.info(f"Expanded crop - X range: {min_x:.1f} to {max_x:.1f} (span: {point_span_x:.1f}px)")
+        logger.info(f"Expanded crop - Y range: {min_y:.1f} to {max_y:.1f} (span: {point_span_y:.1f}px)")
 
         # Calculate dimensions
         crop_height = video_height
@@ -193,13 +189,37 @@ class CropCalculator:
             crop_width = video_width
             crop_height = int(crop_width / self.aspect_ratio)
 
-        # Center on reference points
-        crop_x = int(center_x - crop_width / 2.0)
-        crop_y = int(center_y - crop_height / 2.0)
+        logger.info(f"Crop dimensions: {crop_width}x{crop_height}")
+
+        # Check if horizontal span is wider than crop width
+        # If so, we need to position the crop to capture as much as possible
+        # while accepting that some extreme positions may be cut off
+        if point_span_x >= crop_width * 0.95:  # If span is 95%+ of crop width
+            logger.warning(f"Person moves {point_span_x:.1f}px horizontally, but crop is only {crop_width}px wide")
+            logger.warning("Some frames may have person partially out of frame - this is unavoidable with static crop")
+
+            # Position crop to minimize clipping by centering on the movement range
+            # Add small margins if possible
+            desired_min_x = min_x - 10  # 10px margin
+            desired_max_x = max_x + 10
+
+            # Center the crop on the desired range
+            range_center = (desired_min_x + desired_max_x) / 2.0
+            crop_x = int(range_center - crop_width / 2.0)
+        else:
+            # Normal case: center on the mean position
+            center_x = (min_x + max_x) / 2.0
+            crop_x = int(center_x - crop_width / 2.0)
+
+        # For Y, use the same positioning as standard crop (eyes at 30% from top)
+        center_y = (min_y + max_y) / 2.0
+        crop_y = int(center_y - crop_height * Config.CROP_PADDING_TOP)
 
         # Clamp to bounds
         crop_x = max(0, min(crop_x, video_width - crop_width))
         crop_y = max(0, min(crop_y, video_height - crop_height))
+
+        logger.info(f"Expanded crop result: x={crop_x}, y={crop_y}, w={crop_width}, h={crop_height}")
 
         return (crop_x, crop_y, crop_width, crop_height)
 
