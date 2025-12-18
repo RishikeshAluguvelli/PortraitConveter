@@ -79,11 +79,4 @@ pip install -r requirements.txt
 
 **RetinaFace slow**: Normal - it runs on CPU only
 
-## Requirements
-
-- Python 3.8+
-- 8GB+ RAM (16GB+ recommended)
-- 10GB disk space
-- NVIDIA GPU with CUDA (optional, recommended)
-
 See [requirements.txt](requirements.txt) for Python package details.

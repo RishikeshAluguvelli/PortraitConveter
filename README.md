@@ -183,22 +183,6 @@ converter = PortraitConverter(debug_mode=True)
 success = converter.convert("input.mp4", "output.mp4")
 ```
 
-## Performance
-
-### Speed Estimates (1080p landscape → 1080x1920 portrait)
-
-| Hardware | Processing Speed |
-|----------|------------------|
-| CPU Only (8 cores) | ~0.5x realtime |
-| RTX 3060 (6GB VRAM) | ~2-3x realtime |
-| RTX 4090 (24GB VRAM) | ~5-8x realtime |
-
-*Note: RetinaFace runs on CPU regardless of GPU availability, which may slow down multi-person scenes.*
-
-### Memory Usage
-
-- **CPU**: ~2-4GB RAM
-- **GPU**: ~2-4GB VRAM (for YOLO-11 nano model)
 
 ## Limitations
 
@@ -228,7 +212,7 @@ success = converter.convert("input.mp4", "output.mp4")
 - **Solution**: The static crop calculation should prevent this. If it happens, check debug frames to see detection quality.
 
 **Issue**: Too many/few scenes
-- **Solution**: Adjust `--scene-threshold` (default: 27.0)
+- **Solution**: Adjust `--scene-threshold` (default: 20.0)
   - Higher = fewer scenes
   - Lower = more scenes
 
